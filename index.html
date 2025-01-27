@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galpão de Bens - Prefeitura</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        .item {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            width: 200px;
+        }
+        .carousel {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .carousel img {
+            width: 100%;
+            display: none;
+        }
+        .carousel img.active {
+            display: block;
+        }
+        .carousel-buttons {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .carousel-buttons button {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .info {
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+        .info h3 {
+            font-size: 1rem;
+            margin: 0.5rem 0;
+        }
+        .info p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .cart {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            padding: 1rem;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+        .cart h3 {
+            margin-top: 0;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .cart-item span {
+            font-size: 0.9rem;
+        }
+        .btn-reservar {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            display: block;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>Galpão de Bens - Prefeitura</header>
+    <div class="container">
+        <!-- Item 1 -->
+        <div class="item">
+            <div class="carousel" id="carousel-1">
+                <img src="imagens/image1.jpg" alt="Foto do Bem" class="active">
+                <img src="imagens/image2.jpg" alt="Foto do Bem">
+                <img src="imagens/image3.jpg" alt="Foto do Bem">
+                <div class="carousel-buttons">
+                    <button onclick="prevImage('carousel-1')">&#10094;</button>
+                    <button onclick="nextImage('carousel-1')">&#10095;</button>
+                </div>
+            </div>
+            <div class="info">
+                <h3>Chapa: 12345</h3>
+                <p>Descrição: Mesa de Escritório em bom estado.</p>
+                <button class="btn-reservar" onclick="addToCart('12345', 'Mesa de Escritório')">Reservar</button>
+            </div>
+        </div>
+        <!-- Item 2 -->
+        <div class="item">
+            <div class="carousel" id="carousel-2">
+                <img src="imagens/image1.jpg" alt="Foto do Bem" class="active">
+                <img src="imagens/image2.jpg" alt="Foto do Bem">
+                <img src="imagens/image3.jpg" alt="Foto do Bem">
+                <div class="carousel-buttons">
+                    <button onclick="prevImage('carousel-2')">&#10094;</button>
+                    <button onclick="nextImage('carousel-2')">&#10095;</button>
+                </div>
+            </div>
+            <div class="info">
+                <h3>Chapa: 56789</h3>
+                <p>Descrição: Armário de Aço.</p>
+                <button class="btn-reservar" onclick="addToCart('56789', 'Armário de Aço')">Reservar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Carrinho -->
+    <div class="cart">
+        <h3>Carrinho de Reservas</h3>
+        <div id="cart-items"></div>
+        <a href="finalizar.html" class="btn-finalizar" onclick="saveCart()">Finalizar Reserva</a>
+    </div>
+    <script>
+        const carousels = {};
+        const cart = [];
+
+        function initCarousel(id) {
+            const carousel = document.getElementById(id);
+            const images = carousel.querySelectorAll('img');
+            carousels[id] = { images, current: 0 };
+        }
+
+        function showImage(carouselId, index) {
+            const { images } = carousels[carouselId];
+            images.forEach((img, i) => img.classList.toggle('active', i === index));
+            carousels[carouselId].current = index;
+        }
+
+        function nextImage(carouselId) {
+            const carousel = carousels[carouselId];
+            const nextIndex = (carousel.current + 1) % carousel.images.length;
+            showImage(carouselId, nextIndex);
+        }
+
+        function prevImage(carouselId) {
+            const carousel = carousels[carouselId];
+            const prevIndex = (carousel.current - 1 + carousel.images.length) % carousel.images.length;
+            showImage(carouselId, prevIndex);
+        }
+
+        function addToCart(chapa, descricao) {
+            cart.push({ chapa, descricao });
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('cart-item');
+                div.innerHTML = `<span>${item.chapa} - ${item.descricao}</span>`;
+                cartItems.appendChild(div);
+            });
+        }
+
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        initCarousel('carousel-1');
+        initCarousel('carousel-2');
+    </script>
+</body>
+</html>

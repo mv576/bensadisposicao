@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Reserva</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 1rem;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        .container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 1rem 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <header>Finalizar Reserva</header>
+    <div class="container">
+        <h3>Itens Reservados</h3>
+        <div id="cart-items">
+            <!-- Os itens escolhidos serão carregados aqui -->
+        </div>
+        <h3>Selecione o Setor</h3>
+        <select id="setor" onchange="updateResponsavel()">
+            <option value="">Selecione um setor</option>
+            <option value="Administração">Administração</option>
+            <option value="Educação">Educação</option>
+            <option value="Saúde">Saúde</option>
+            <option value="Obras">Obras</option>
+        </select>
+        <h3>Responsável</h3>
+        <input type="text" id="responsavel" placeholder="Selecione um setor" readonly>
+        <button onclick="finalizarReserva()">Confirmar Reserva</button>
+    </div>
+    <script>
+        const responsaveis = {
+            "Administração": "Maria Silva",
+            "Educação": "João Oliveira",
+            "Saúde": "Ana Costa",
+            "Obras": "Carlos Pereira"
+        };
+
+        function loadCart() {
+            const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+            const cartContainer = document.getElementById('cart-items');
+            cartContainer.innerHTML = '';
+
+            if (cartItems.length === 0) {
+                cartContainer.innerHTML = '<p>Não há itens no carrinho.</p>';
+                return;
+            }
+
+            cartItems.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('cart-item');
+                div.innerHTML = `<span>${item.chapa} - ${item.descricao}</span>`;
+                cartContainer.appendChild(div);
+            });
+        }
+
+        function updateResponsavel() {
+            const setor = document.getElementById('setor').value;
+            const responsavelInput = document.getElementById('responsavel');
+            responsavelInput.value = responsaveis[setor] || '';
+        }
+
+        function finalizarReserva() {
+            const setor = document.getElementById('setor').value;
+            const responsavel = document.getElementById('responsavel').value;
+            const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+
+            if (!setor || !responsavel) {
+                alert('Por favor, selecione um setor e confirme o responsável antes de finalizar a reserva.');
+                return;
+            }
+
+            if (cartItems.length === 0) {
+                alert('Não há itens no carrinho para reservar.');
+                return;
+            }
+
+            // Gera o PDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(16);
+            doc.text("Resumo da Reserva", 10, 10);
+
+            doc.setFontSize(12);
+            doc.text(`Setor: ${setor}`, 10, 20);
+            doc.text(`Responsável: ${responsavel}`, 10, 30);
+
+            doc.text("Itens Reservados:", 10, 40);
+            cartItems.forEach((item, index) => {
+                doc.text(`${index + 1}. ${item.chapa} - ${item.descricao}`, 10, 50 + index * 10);
+            });
+
+            // Adiciona espaço para assinatura
+            const signatureLineY = 50 + cartItems.length * 10 + 20;
+            doc.text("Assinatura do Responsável: __________________________", 10, signatureLineY);
+
+            // Salva o PDF
+            doc.save("resumo_reserva.pdf");
+
+            // Limpa os itens da página e do localStorage
+            localStorage.removeItem('cart');
+            document.getElementById('cart-items').innerHTML = '<p>Itens reservados com sucesso.</p>';
+            alert('Reserva confirmada! O PDF foi gerado.');
+        }
+
+        // Carrega os itens do carrinho ao abrir a página
+        loadCart();
+    </script>
+</body>
+</html>
