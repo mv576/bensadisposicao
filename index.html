@@ -110,13 +110,17 @@
             display: block;
             width: 100%;
         }
+        .btn-reservar[disabled] {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
     <header>Galpão de Bens - Prefeitura</header>
-    <div class="container" id="item-container">
+    <div class="container">
         <!-- Item 1 -->
-        <div class="item" data-chapa="12345">
+        <div class="item">
             <div class="carousel" id="carousel-1">
                 <img src="image1.jpg" alt="Foto do Bem" class="active">
                 <img src="image2.jpg" alt="Foto do Bem">
@@ -129,11 +133,11 @@
             <div class="info">
                 <h3>Chapa: 12345</h3>
                 <p>Descrição: Mesa de Escritório em bom estado.</p>
-                <button class="btn-reservar" onclick="addToCart('12345', 'Mesa de Escritório')">Reservar</button>
+                <button class="btn-reservar" id="btn-12345" onclick="addToCart('12345', 'Mesa de Escritório')">Reservar</button>
             </div>
         </div>
         <!-- Item 2 -->
-        <div class="item" data-chapa="56789">
+        <div class="item">
             <div class="carousel" id="carousel-2">
                 <img src="image1.jpg" alt="Foto do Bem" class="active">
                 <img src="image2.jpg" alt="Foto do Bem">
@@ -146,7 +150,7 @@
             <div class="info">
                 <h3>Chapa: 56789</h3>
                 <p>Descrição: Armário de Aço.</p>
-                <button class="btn-reservar" onclick="addToCart('56789', 'Armário de Aço')">Reservar</button>
+                <button class="btn-reservar" id="btn-56789" onclick="addToCart('56789', 'Armário de Aço')">Reservar</button>
             </div>
         </div>
     </div>
@@ -186,9 +190,9 @@
 
         function addToCart(chapa, descricao) {
             cart.push({ chapa, descricao });
-            localStorage.setItem('cart', JSON.stringify(cart));
-            document.querySelector(`[data-chapa="${chapa}"]`).remove();
             updateCartDisplay();
+            localStorage.setItem('cart', JSON.stringify(cart));
+            disableButton(chapa);
         }
 
         function updateCartDisplay() {
@@ -202,14 +206,27 @@
             });
         }
 
+        function disableButton(chapa) {
+            const button = document.getElementById(`btn-${chapa}`);
+            if (button) {
+                button.textContent = 'Reservado';
+                button.disabled = true;
+            }
+        }
+
+        function initializeButtons() {
+            cart.forEach(item => disableButton(item.chapa));
+        }
+
         function saveCart() {
             localStorage.setItem('cart', JSON.stringify(cart));
         }
 
-        // Inicialização
+        // Initialize carousels and buttons
         initCarousel('carousel-1');
         initCarousel('carousel-2');
         updateCartDisplay();
+        initializeButtons();
     </script>
 </body>
 </html>
